@@ -65,14 +65,14 @@ async function bot(prompt, threadId) {
         let run = await openai.beta.threads.runs.createAndPoll(
             threadId,
             { 
-              assistant_id: assistantId,
-              instructions: "fale com o ivanelson sobre a softtek"
+              assistant_id: assistantId
             }
         );
 
         if (run.status === 'completed') {
             const messages = await openai.beta.threads.messages.list(run.thread_id);
-            const botResponse = messages.data[0].content[0].text.value;
+            let botResponse = messages.data[0].content[0].text.value;
+            botResponse = botResponse.replace(/【\d+:\d+†[a-zA-Z]+】/g, '');
             return botResponse
           } else {
             return `O status do GPT é: ${run.status} falho :()`;
