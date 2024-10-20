@@ -9,7 +9,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const modelo = 'gpt-4'; // Fixed model name
+const modelo = 'gpt-4o-mini'; // Fixed model name
 const assistantId = process.env.ASSISTANT_API;
 
 const port = 3000;
@@ -27,10 +27,23 @@ app.use((req, res, next) => {
     next();
 });
 
-const contexto = loadDataBase('dados/base_chamados.txt');
+// const contexto = loadDataBase('dados/base_chamados.txt');
+// const thread = openai.beta.threads.create();
+
+let threadId;
+
+(async () => {
+    try {
+        const thread = await openai.beta.threads.create()
+        threadId = thread.id
+    } 
+    catch (error) {
+        console.log(error)
+    }
+})();
 
 // Moved thread creation inside the bot function
-async function bot(prompt) {
+async function bot(prompt, threadId) {
     // const myAssistants = await openai.beta.assistants.list({});
     
     // console.log('Assistant ID Object:', myAssistants);
@@ -38,12 +51,10 @@ async function bot(prompt) {
     let repeticao = 0;
 
     try {
-        // Create a new thread for conversation
-        const thread = await openai.beta.threads.create();
 
         // Send user message to the thread
         const message = await openai.beta.threads.messages.create(
-            thread.id,
+            threadId,
             {
               role: "user",
               content: prompt
@@ -52,7 +63,7 @@ async function bot(prompt) {
 
         // Generate a response from the assistant
         let run = await openai.beta.threads.runs.createAndPoll(
-            thread.id,
+            threadId,
             { 
               assistant_id: assistantId,
               instructions: "fale com o ivanelson sobre a softtek"
@@ -93,7 +104,7 @@ app.get("/", (req, res) => {
 app.post("/chat", async (req, res) => {
     const prompt = req.body.msg;
     try {
-        const resposta = await bot(prompt);
+        const resposta = await bot(prompt, threadId);
         res.send(resposta);
     } catch (erro) {
         res.status(500).send(`Erro no GPT: ${erro}`);
