@@ -42,7 +42,6 @@ async function bot(prompt, threadId) {
     let repeticao = 0;
 
     try {
-
         const message = await openai.beta.threads.messages.create(
             threadId,
             {
