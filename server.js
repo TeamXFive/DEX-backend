@@ -1,5 +1,3 @@
-const { loadDataBase } = require('./helpers')
-
 const express = require("express");
 const dotenv = require('dotenv');
 dotenv.config();
@@ -9,7 +7,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const modelo = 'gpt-4o-mini'; // Fixed model name
 const assistantId = process.env.ASSISTANT_API;
 
 const port = 3000;
@@ -27,9 +24,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// const contexto = loadDataBase('dados/base_chamados.txt');
-// const thread = openai.beta.threads.create();
-
 let threadId;
 
 (async () => {
@@ -42,17 +36,13 @@ let threadId;
     }
 })();
 
-// Moved thread creation inside the bot function
 async function bot(prompt, threadId) {
-    // const myAssistants = await openai.beta.assistants.list({});
-    
-    // console.log('Assistant ID Object:', myAssistants);
+
     const maximoTentativas = 1;
     let repeticao = 0;
 
     try {
 
-        // Send user message to the thread
         const message = await openai.beta.threads.messages.create(
             threadId,
             {
@@ -61,7 +51,6 @@ async function bot(prompt, threadId) {
             }
         );
 
-        // Generate a response from the assistant
         let run = await openai.beta.threads.runs.createAndPoll(
             threadId,
             { 
@@ -77,15 +66,6 @@ async function bot(prompt, threadId) {
           } else {
             return `O status do GPT é: ${run.status} falho :()`;
           }
-
-        // // Check if the run is completed
-        // if (run.status === 'completed') {
-        //     const messages = await openai.beta.threads.messages.list(run.thread_id);
-        //     const botResponse = messages.data.reverse()[0].content[0].text.value; // Get the last message
-        //     return botResponse;
-        // } else {
-        //     return `O status do GPT é: ${run.status} falho :()`;
-        // }
 
     } catch (erro) {
         repeticao += 1;
