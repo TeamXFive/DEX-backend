@@ -97,12 +97,21 @@ app.post("/upload", upload.single('file'), async(req, res) => {
         if (!req.file) {
             return res.status(400).send('No file uploaded.');
         }
-        res.status(200).send(`Arquivo enviado com sucesso: ${req.filename}`)
+        res.status(200).send(`Arquivo enviado com sucesso: ${req.file.filename}`)
     
     } catch (error) {
         res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`)
     }
-})
+});
+
+app.post("/file_retrieval", async (req, res) => {
+    try {
+        const file_list = await openai.files.list();
+        return res.status(200).send(file_list.data);
+    } catch (error) {
+        res.status(500).send(`Erro ao recuperar arquivo: ${error}`)
+    }
+});
 
 app.listen(port, () => {
     console.log(`API running on http://localhost:${port}`);
