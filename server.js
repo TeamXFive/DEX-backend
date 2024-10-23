@@ -1,3 +1,5 @@
+const upload = require('./fileUpload.js');
+
 const express = require("express");
 const dotenv = require('dotenv');
 dotenv.config();
@@ -64,7 +66,7 @@ async function bot(prompt, threadId) {
             return botResponse
           } else {
             return `O status do GPT é: ${run.status} falho :()`;
-          }
+        }
 
     } catch (erro) {
         repeticao += 1;
@@ -89,6 +91,18 @@ app.post("/chat", async (req, res) => {
         res.status(500).send(`Erro no GPT: ${erro}`);
     }
 });
+
+app.post("/upload", upload.single('file'), async(req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).send('No file uploaded.');
+        }
+        res.status(200).send(`Arquivo enviado com sucesso: ${req.filename}`)
+    
+    } catch (error) {
+        res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`)
+    }
+})
 
 app.listen(port, () => {
     console.log(`API running on http://localhost:${port}`);
