@@ -1,4 +1,5 @@
-const upload = require("./fileUpload.js");
+const upload = require('./fileUpload.js');
+const fs = require('fs');
 
 const express = require("express");
 const dotenv = require("dotenv");
@@ -10,6 +11,7 @@ const openai = new OpenAI({
 });
 
 const assistantId = process.env.ASSISTANT_API;
+const vectorStoreId = process.env.VECTOR_ID;
 
 const port = 3000;
 const app = express();
@@ -96,9 +98,13 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         if (!req.file) {
             return res.status(400).send("No file uploaded.");
         }
-        res.status(200).send(
-            `Arquivo enviado com sucesso: ${req.file.filename}`
+      
+        filePath = `uploads/${req.file.filename}`;
+        const fileStreams = [filePath].map((path) =>
+            fs.createReadStream(path),
         );
+        await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, {files: fileStreams,})
+        res.status(200).send(`Arquivo enviado com sucesso: ${req.file.filename}`)
     } catch (error) {
         res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`);
     }
