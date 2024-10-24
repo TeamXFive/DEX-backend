@@ -21,7 +21,7 @@ app.set("secretKey", "alura");
 app.use(express.static("public"));
 app.use(express.json());
 // Configure CORS to allow specific origins
-const allowedOrigins = ['https://dex.rweb.site', 'https://dex.rweb.vercel/knowledge'];
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:5173/knowledge', 'https://dex.rweb.site', 'https://dex.rweb.vercel/knowledge'];
 
 const corsOptions = {
     origin: (origin, callback) => {
