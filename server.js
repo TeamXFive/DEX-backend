@@ -20,12 +20,23 @@ const app = express();
 app.set("secretKey", "alura");
 app.use(express.static("public"));
 app.use(express.json());
-app.use(cors({
-    origin: 'https://dex.rweb.site',
+// Configure CORS to allow specific origins
+const allowedOrigins = ['https://dex.rweb.site', 'https://dex.rweb.vercel/knowledge'];
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin) || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['X-Requested-With', 'content-type']
-}));
+};
+
+app.use(cors(corsOptions));
 
 let threadId;
 
