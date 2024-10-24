@@ -24,13 +24,7 @@ app.use(express.json());
 const allowedOrigins = ['http://localhost:5173', 'http://localhost:5173/knowledge', 'https://dex.rweb.site', 'https://dex.rweb.vercel/knowledge'];
 
 const corsOptions = {
-    origin: (origin, callback) => {
-        if (allowedOrigins.includes(origin) || !origin) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: "*",
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['X-Requested-With', 'Content-Type']
