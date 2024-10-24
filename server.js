@@ -103,7 +103,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
             return res.status(400).send("No file uploaded.");
         }
       
-        filePath = `uploads/${req.file.filename}`;
+        filePath = `tmp/${req.file.filename}`;
         const fileStreams = [filePath].map((path) =>
             fs.createReadStream(path),
         );
