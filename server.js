@@ -99,13 +99,12 @@ app.post("/upload", upload.single('file'), async(req, res) => {
         if (!req.file) {
             return res.status(400).send('No file uploaded.');
         }
+        filePath = `uploads/${req.file.filename}`;
+        const fileStreams = [filePath].map((path) =>
+            fs.createReadStream(path),
+        );
+        await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, {files: fileStreams,})
         res.status(200).send(`Arquivo enviado com sucesso: ${req.file.filename}`)
-        fileName = req.file.filename;
-        // const fileStreams = "uploads/1729732287622-OTHONILTON.docx"].map((path) =>
-        //     fs.createReadStream(path)
-        // );
-        await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, fileStreams)
-        console.log("oi")
     } catch (error) {
         res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`)
     }
