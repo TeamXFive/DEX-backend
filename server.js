@@ -21,16 +21,22 @@ app.set("secretKey", "alura");
 app.use(express.static("public"));
 app.use(express.json());
 // Configure CORS to allow specific origins
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5173/knowledge', 'https://dex.rweb.site', 'https://dex.rweb.vercel/knowledge'];
+// const allowedOrigins = ['http://localhost:5173', 'http://localhost:5173/knowledge', 'https://dex.rweb.site', 'https://dex.rweb.vercel/knowledge'];
 
-const corsOptions = {
-    origin: "*",
-    credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['X-Requested-With', 'Content-Type']
-};
+// const corsOptions = {
+//     origin: "*",
+//     credentials: true,
+//     methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
+//     allowedHeaders: ['X-Requested-With', 'Content-Type']
+// };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+
+app.use(cors({
+    origin: 'https://dex.rweb.site', // Replace with your frontend's origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Specify allowed methods
+    credentials: true // If your frontend uses cookies or other credentials
+}));
 
 let threadId;
 
