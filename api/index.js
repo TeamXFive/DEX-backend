@@ -1,4 +1,4 @@
-const upload = require('./fileUpload.js');
+const upload = require('../fileUpload.js');
 const fs = require('fs');
 var cors = require('cors')
 
@@ -83,11 +83,11 @@ async function bot(prompt, threadId) {
     }
 }
 
-app.get("/", (req, res) => {
+app.get("/api/", (req, res) => {
     res.send("Hello, Express!");
 });
 
-app.post("/chat", async (req, res) => {
+app.post("/api/chat", async (req, res) => {
     const prompt = req.body.msg;
     try {
         const resposta = await bot(prompt, threadId);
@@ -97,7 +97,7 @@ app.post("/chat", async (req, res) => {
     }
 });
 
-app.post("/upload", upload.single("file"), async (req, res) => {
+app.post("/api/upload", upload.single("file"), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).send("No file uploaded.");
@@ -114,7 +114,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     }
 });
 
-app.post("/file_retrieval", async (req, res) => {
+app.post("/api/file_retrieval", async (req, res) => {
     try {
         const vectorStoreId = "vs_iAJRUQH8BrdNlelvHCSoIY4H";
         const listResponse = await openai.files.list();
