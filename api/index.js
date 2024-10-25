@@ -20,7 +20,6 @@ const app = express();
 app.set("secretKey", "alura");
 app.use(express.static("public"));
 app.use(express.json());
-// Configure CORS to allow specific origins
 const allowedOrigins = ['http://localhost:5173', 'http://localhost:5173/knowledge', 'https://dex.rweb.site', 'https://dex.rweb.vercel/knowledge'];
 
 const corsOptions = {
@@ -31,12 +30,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-// app.use(cors({
-//     origin: 'https://dex.rweb.site', // Replace with your frontend's origin
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Specify allowed methods
-//     credentials: true // If your frontend uses cookies or other credentials
-// }));
 
 let threadId;
 
@@ -97,37 +90,23 @@ app.post("/api/chat", async (req, res) => {
     }
 });
 
-// app.post("/api/upload", upload.single("file"), async (req, res) => {
-//     try {
-//         if (!req.file) {
-//             return res.status(400).send("No file uploaded.");
-//         }
-      
-//         filePath = `tmp/${req.file.filename}`;
-//         const fileStreams = [filePath].map((path) =>
-//             fs.createReadStream(path),
-//         );
-//         await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, {files: fileStreams,})
-//         res.status(200).send(`Arquivo enviado com sucesso: ${req.file.filename}`)
-//     } catch (error) {
-//         res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`);
-//     }
-// });
-
 app.post("/api/upload", upload.single("file"), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).send("No file uploaded.");
         }
-        
-        const fileStream = require('stream').Readable.from(req.file.buffer);
-        await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, { files: [fileStream] });
-        
-        res.status(200).send(`Arquivo enviado com sucesso: ${req.file.originalname}`);
+      
+        filePath = `tmp/${req.file.filename}`;
+        const fileStreams = [filePath].map((path) =>
+            fs.createReadStream(path),
+        );
+        await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, {files: fileStreams,})
+        res.status(200).send(`Arquivo enviado com sucesso: ${req.file.filename}`)
     } catch (error) {
         res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`);
     }
 });
+
 
 app.post("/api/file_retrieval", async (req, res) => {
     try {
