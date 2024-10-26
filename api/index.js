@@ -108,8 +108,6 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
         if (!req.file) {
             return res.status(400).send("No file uploaded.");
         }
-
-        // Create an array of File objects from the uploaded buffers
         const files = [req.file].map((file) => {
             // Creating a Blob from the buffer
             const blob = new Blob([file.buffer], { type: file.mimetype });
