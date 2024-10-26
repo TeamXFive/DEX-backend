@@ -1,6 +1,7 @@
-const upload = require('../fileUpload.js');
-const fs = require('fs');
-var cors = require('cors')
+const upload = require("../fileUpload.js");
+const fs = require("fs");
+var cors = require("cors");
+const blob = require("@vercel/blob");
 
 const express = require("express");
 const dotenv = require("dotenv");
@@ -21,13 +22,18 @@ app.set("secretKey", "alura");
 app.use(express.static("public"));
 app.use(express.json());
 // Configure CORS to allow specific origins
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5173/knowledge', 'https://dex.rweb.site', 'https://dex.rweb.vercel/knowledge'];
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5173/knowledge",
+    "https://dex.rweb.site",
+    "https://dex.rweb.vercel/knowledge",
+];
 
 const corsOptions = {
     origin: "*",
     credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['X-Requested-With', 'Content-Type']
+    methods: ["GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["X-Requested-With", "Content-Type"],
 };
 
 app.use(cors(corsOptions));
@@ -97,35 +103,34 @@ app.post("/api/chat", async (req, res) => {
     }
 });
 
-// app.post("/api/upload", upload.single("file"), async (req, res) => {
-//     try {
-//         if (!req.file) {
-//             return res.status(400).send("No file uploaded.");
-//         }
-      
-//         filePath = `tmp/${req.file.filename}`;
-//         const fileStreams = [filePath].map((path) =>
-//             fs.createReadStream(path),
-//         );
-//         await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, {files: fileStreams,})
-//         res.status(200).send(`Arquivo enviado com sucesso: ${req.file.filename}`)
-//     } catch (error) {
-//         res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`);
-//     }
-// });
-
 app.post("/api/upload", upload.single("file"), async (req, res) => {
+    let response;
     try {
         if (!req.file) {
             return res.status(400).send("No file uploaded.");
         }
-        
-        const fileStream = require('stream').Readable.from(req.file.buffer);
-        await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, { files: [fileStream] });
-        
-        res.status(200).send(`Arquivo enviado com sucesso: ${req.file.originalname}`);
+
+        // Create an array of File objects from the uploaded buffers
+        const files = [req.file].map((file) => {
+            // Creating a Blob from the buffer
+            const blob = new Blob([file.buffer], { type: file.mimetype });
+            return new File([blob], file.originalname, { type: file.mimetype });
+        });
+
+        // Assuming you have vectorStoreId defined
+        await openai.beta.vectorStores.fileBatches.uploadAndPoll(
+            vectorStoreId,
+            { files } // Pass the array of File objects
+        );
+
+        res.status(200).send(
+            `Arquivo enviado com sucesso: ${req.file.filename}`
+        );
     } catch (error) {
-        res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`);
+        res.status(500).send(
+            `Erro ao fazer upload do arquivo: ${error}`,
+            response
+        );
     }
 });
 
@@ -153,9 +158,9 @@ app.post("/api/file_retrieval", async (req, res) => {
 app.delete("/api/file_deletion/:id", async (req, res) => {
     try {
         const fileId = req.params.id;
-        
+
         await openai.files.del(fileId);
-        
+
         return res.status(200).send("Arquivo deletado com sucesso");
     } catch (error) {
         res.status(500).send(`Erro ao deletar arquivo: ${error}`);
