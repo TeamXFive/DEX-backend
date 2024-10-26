@@ -37,12 +37,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// app.use(cors({
-//     origin: 'https://dex.rweb.site', // Replace with your frontend's origin
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Specify allowed methods
-//     credentials: true // If your frontend uses cookies or other credentials
-// }));
-
 let threadId;
 
 (async () => {
@@ -109,11 +103,18 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
             return res.status(400).send("No file uploaded.");
         }
 
+        const encodedOriginalName = Buffer.from(
+            req.file.originalname,
+            "latin1"
+        ).toString("utf8");
+
         // Create an array of File objects from the uploaded buffers
         const files = [req.file].map((file) => {
             // Creating a Blob from the buffer
             const blob = new Blob([file.buffer], { type: file.mimetype });
-            return new File([blob], file.originalname, { type: file.mimetype });
+            return new File([blob], encodedOriginalName, {
+                type: file.mimetype,
+            });
         });
 
         // Assuming you have vectorStoreId defined
