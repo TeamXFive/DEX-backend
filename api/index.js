@@ -104,66 +104,35 @@ app.post("/api/chat", async (req, res) => {
 });
 
 app.post("/api/upload", upload.single("file"), async (req, res) => {
+    let response;
     try {
         if (!req.file) {
             return res.status(400).send("No file uploaded.");
         }
 
-        filePath = `tmp/${req.file.filename}`;
-        const fileStreams = [filePath].map((path) => fs.createReadStream(path));
+        // Create an array of File objects from the uploaded buffers
+        const files = [req.file].map((file) => {
+            // Creating a Blob from the buffer
+            const blob = new Blob([file.buffer], { type: file.mimetype });
+            return new File([blob], file.originalname, { type: file.mimetype });
+        });
+
+        // Assuming you have vectorStoreId defined
         await openai.beta.vectorStores.fileBatches.uploadAndPoll(
             vectorStoreId,
-            { files: fileStreams }
+            { files } // Pass the array of File objects
         );
+
         res.status(200).send(
             `Arquivo enviado com sucesso: ${req.file.filename}`
         );
     } catch (error) {
-        res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`);
+        res.status(500).send(
+            `Erro ao fazer upload do arquivo: ${error}`,
+            response
+        );
     }
 });
-
-// app.post("/api/upload", upload.single("file"), async (req, res) => {
-//     try {
-//         if (!req.file) {
-//             return res.status(400).send("No file uploaded.");
-//         }
-
-//         const fileStream = require("stream").Readable.from(req.file.buffer);
-//         // const filePath = `tmp/${req.file.filename}`;
-//         // const fileStreams = [filePath].map((path) => fs.createReadStream(path));
-//         const { url } = await blob.put(
-//             `vector-files/${req.file.filename}`,
-//             fileStream,
-//             { access: "public" }
-//         );
-//         url;
-//         await openai.beta.vectorStores.fileBatches.uploadAndPoll(
-//             vectorStoreId,
-//             { files: fileStreams }
-//         );
-//         res.status(200).send(
-//             `Arquivo enviado com sucesso: ${req.file.filename}`
-//         );
-//     } catch (error) {
-//         res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`);
-//     }
-// });
-
-// app.post("/api/upload", upload.single("file"), async (req, res) => {
-//     try {
-//         if (!req.file) {
-//             return res.status(400).send("No file uploaded.");
-//         }
-
-//         const fileStream = require('stream').Readable.from(req.file.buffer);
-//         await openai.beta.vectorStores.fileBatches.uploadAndPoll(vectorStoreId, { files: [fileStream] });
-
-//         res.status(200).send(`Arquivo enviado com sucesso: ${req.file.originalname}`);
-//     } catch (error) {
-//         res.status(500).send(`Erro ao fazer upload do arquivo: ${error}`);
-//     }
-// });
 
 app.post("/api/file_retrieval", async (req, res) => {
     try {
