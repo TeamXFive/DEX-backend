@@ -150,6 +150,18 @@ app.post("/api/file_retrieval", async (req, res) => {
     }
 });
 
+app.delete("/api/file_deletion/:id", async (req, res) => {
+    try {
+        const fileId = req.params.id;
+        
+        await openai.files.del(fileId);
+        
+        return res.status(200).send("Arquivo deletado com sucesso");
+    } catch (error) {
+        res.status(500).send(`Erro ao deletar arquivo: ${error}`);
+    }
+});
+
 app.listen(port, () => {
     console.log(`API running on http://localhost:${port}`);
 });
