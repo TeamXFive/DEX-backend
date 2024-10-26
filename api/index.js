@@ -1,7 +1,6 @@
 const upload = require("../fileUpload.js");
 const fs = require("fs");
 var cors = require("cors");
-const blob = require("@vercel/blob");
 
 const express = require("express");
 const dotenv = require("dotenv");
